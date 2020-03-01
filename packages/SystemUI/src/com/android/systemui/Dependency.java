@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.FlashlightController;
+import com.android.systemui.statusbar.policy.TaskHelper;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.tuner.TunablePadding.TunablePaddingService;
 import com.android.systemui.tuner.TunerService;
@@ -174,6 +175,7 @@ public class Dependency {
     @Inject Lazy<DialogTransitionAnimator> mDialogTransitionAnimatorLazy;
     @Inject Lazy<UserTracker> mUserTrackerLazy;
     @Inject Lazy<StatusBarWindowController> mStatusBarWindowControllerLazy;
+    @Inject Lazy<TaskHelper> mTaskHelper;
 
     @Inject
     public Dependency() {
@@ -217,6 +219,7 @@ public class Dependency {
         mProviders.put(NotificationMediaManager.class, mNotificationMediaManager::get);
         mProviders.put(SysUiState.class, mSysUiStateFlagsContainer::get);
         mProviders.put(CommandQueue.class, mCommandQueue::get);
+        mProviders.put(TaskHelper.class, mTaskHelper::get);
         mProviders.put(UiEventLogger.class, mUiEventLogger::get);
         mProviders.put(FeatureFlags.class, mFeatureFlagsLazy::get);
         mProviders.put(StatusBarContentInsetsProvider.class, mContentInsetsProviderLazy::get);
