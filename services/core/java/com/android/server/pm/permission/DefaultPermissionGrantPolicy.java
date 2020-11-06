@@ -244,6 +244,11 @@ final class DefaultPermissionGrantPolicy {
         NOTIFICATION_PERMISSIONS.add(Manifest.permission.POST_NOTIFICATIONS);
     }
 
+    private static final Set<String> SUSPEND_APP_PERMISSIONS = new ArraySet<>();
+    static {
+        SUSPEND_APP_PERMISSIONS.add(Manifest.permission.SUSPEND_APPS);
+    }
+
     private static final int MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS = 1;
 
     private static final String ACTION_TRACK = "com.android.fitness.TRACK";
@@ -1147,6 +1152,11 @@ final class DefaultPermissionGrantPolicy {
         // Chromium Sign-in
         grantSystemFixedPermissionsToSystemPackage(pm, "org.chromium.chrome", userId, CONTACTS_PERMISSIONS,
                 STORAGE_PERMISSIONS);
+
+        // Flipendo
+        grantSystemFixedPermissionsToSystemPackage(pm,
+                getDefaultProviderAuthorityPackage("com.google.android.flipendo", userId),
+                userId, SUSPEND_APP_PERMISSIONS);
 
     }
 
