@@ -59,4 +59,7 @@
     <!-- Whether device supports in-display fingerprint -->
     <java-symbol type="bool" name="config_supportsUdfps" />
 
+    <!-- Boost Framework -->
+    <java-symbol type="bool" name="config_supportsBoostFramework" />
+
 </resources>
