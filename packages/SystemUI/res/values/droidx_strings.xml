@@ -119,4 +119,7 @@
     <string name="screenrecord_keep_screen_awake_label">Stay awake</string>
     <string name="screenrecord_keep_screen_awake_summary">Keep the screen on</string>
 
+    <!-- Text while recognizing face -->
+    <string name="face_unlock_recognizing">Recognizing face...</string>
+
 </resources>
