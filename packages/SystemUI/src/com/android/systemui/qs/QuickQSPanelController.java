@@ -97,6 +97,9 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel>
         
         mTunerService.addTunable(mView, QSPanel.QS_LAYOUT_COLUMNS);
         mTunerService.addTunable(mView, QSPanel.QS_LAYOUT_COLUMNS_LANDSCAPE);
+        mTunerService.addTunable(mView, QSPanel.QQS_LAYOUT_ROWS);
+        mTunerService.addTunable(mView, QSPanel.QQS_LAYOUT_ROWS_LANDSCAPE);
+
     }
 
     @Override
@@ -123,9 +126,7 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel>
     }
 
     private void updateConfig() {
-        int maxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_tiles);
-        int columns = TileUtils.getQSColumnsCount(getContext());
-        mView.setMaxTiles(Math.max(columns, maxTiles));
+        mView.setMaxTiles(TileUtils.getQSColumnsCount(getContext()));
         setTiles();
     }
 
