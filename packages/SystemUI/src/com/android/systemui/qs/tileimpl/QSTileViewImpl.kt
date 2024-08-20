@@ -153,7 +153,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private lateinit var ripple: RippleDrawable
     private lateinit var backgroundDrawable: Drawable
     private lateinit var backgroundBaseDrawable: Drawable
-    private lateinit var backgroundOverlayDrawable: Drawable
+    private lateinit var backgroundOverlayDrawable: StateListDrawable
 
     private var backgroundColor: Int = 0
     private var backgroundOverlayColor: Int = 0
@@ -384,18 +384,13 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     fun createTileBackground(): Drawable {
-        if (isRoundQS()) {
-            ripple = mContext.getDrawable(R.drawable.qs_tile_background_no_mask) as RippleDrawable
-            backgroundDrawable = ripple.findDrawableByLayerId(R.id.background) as GradientDrawable
-        } else {
-            ripple = mContext.getDrawable(R.drawable.qs_tile_background) as RippleDrawable
-            backgroundDrawable = ripple.findDrawableByLayerId(R.id.background) as LayerDrawable
-            backgroundBaseDrawable =
-                (backgroundDrawable as LayerDrawable).findDrawableByLayerId(R.id.qs_tile_background_base)
-            backgroundOverlayDrawable =
-                (backgroundDrawable as LayerDrawable).findDrawableByLayerId(R.id.qs_tile_background_overlay)
-            backgroundOverlayDrawable.mutate().setTintMode(PorterDuff.Mode.SRC)
-        }
+        ripple = mContext.getDrawable(if (isRoundQS()) R.drawable.qs_tile_background_no_mask else R.drawable.qs_tile_background)!!.mutate() as RippleDrawable
+        backgroundDrawable = ripple.findDrawableByLayerId(R.id.background) as LayerDrawable
+        backgroundBaseDrawable =
+            backgroundDrawable.findDrawableByLayerId(R.id.qs_tile_background_base)
+        backgroundOverlayDrawable =
+            backgroundDrawable.findDrawableByLayerId(R.id.qs_tile_background_overlay) as StateListDrawable
+        backgroundOverlayDrawable.mutate().setTintMode(PorterDuff.Mode.SRC)
         return ripple
     }
 
