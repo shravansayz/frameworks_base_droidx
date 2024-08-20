@@ -111,7 +111,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private int mAccessibilityAction = ACTION_NONE;
     private int mAccessibilityFromIndex;
     private final UiEventLogger mUiEventLogger;
-    //private final AccessibilityDelegateCompat mAccessibilityDelegate;
+    private final AccessibilityDelegateCompat mAccessibilityDelegate;
     @Nullable
     private RecyclerView mRecyclerView;
     private int mNumColumns;

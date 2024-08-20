@@ -139,6 +139,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     private float mLastPosition;
     private final QSHost mHost;
     private final DelayableExecutor mExecutor;
+    private final TunerService mTunerService;
     private boolean mShowCollapsedOnKeyguard;
     private int mQQSTop;
     private boolean isA11Style;
@@ -158,6 +159,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
         mQuickQSPanelController = quickQSPanelController;
         mHost = qsTileHost;
         mExecutor = executor;
+        mTunerService = tunerService;
         mQSExpansionPathInterpolator = qsExpansionPathInterpolator;
         mHost.addCallback(this);
         mQsPanelController.addOnAttachStateChangeListener(this);
