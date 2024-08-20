@@ -1,24 +1,24 @@
 /*
- * Copyright (C) 2022 The Pixel Experience Project
- *               2021-2022 crDroid Android Project
- * Copyright (C) 2022 Paranoid Android
- * Copyright (C) 2022 StatiXOS
- * Copyright (C) 2023 the RisingOS Android Project
- *           (C) 2023 ArrowOS
- *           (C) 2023 The LibreMobileOS Foundation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2022 The Pixel Experience Project
+*               2021-2022 crDroid Android Project
+* Copyright (C) 2022 Paranoid Android
+* Copyright (C) 2022 StatiXOS
+* Copyright (C) 2023 the RisingOS Android Project
+*           (C) 2023 ArrowOS
+*           (C) 2023 The LibreMobileOS Foundation
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.internal.util.droidx;
 
@@ -59,19 +59,19 @@ public class PixelPropsUtils {
 
     private static final Map<String, Object> propsToChangeRecentPixel =
             createGoogleSpoofProps("Pixel 8 Pro",
-                    "google/husky/husky:14/AP2A.240805.005/12025142:user/release-keys");
+                "google/husky/husky:14/AP2A.240805.005/12025142:user/release-keys");
 
     private static final Map<String, Object> propsToChangePixel5a =
             createGoogleSpoofProps("Pixel 5a",
-                    "google/barbet/barbet:14/AP2A.240805.005/12025142:user/release-keys");
+                "google/barbet/barbet:14/AP2A.240805.005/12025142:user/release-keys");
 
-   private static final Map<String, Object> propsToChangePixel6 =
+private static final Map<String, Object> propsToChangePixel6 =
             createGoogleSpoofProps("Pixel 6 Pro",
-                    "google/raven/raven:14/AP2A.240805.005/12025142:user/release-keys");
+                "google/raven/raven:14/AP2A.240805.005/12025142:user/release-keys");
 
     private static final Map<String, Object> propsToChangePixelXL =
             createGoogleSpoofProps("Pixel XL",
-                    "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys");
+                "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys");
 
     private static final Map<String, ArrayList<String>> propsToKeep;
 
@@ -96,18 +96,18 @@ public class PixelPropsUtils {
                 "com.google.android.apps.privacy.wildlife",
                 "com.google.android.apps.subscriptions.red",
                 "com.google.android.apps.photos",
-		"com.google.android.googlequicksearchbox",
+                "com.google.android.googlequicksearchbox",
                 "com.google.android.gms.ui",
                 "com.google.android.gms.learning",
                 "com.google.android.gms.persistent"
         ));
 
-   private static final ArrayList<String> packagesToChangePixel5a = 
+private static final ArrayList<String> packagesToChangePixel5a = 
         new ArrayList<String> (
             Arrays.asList(
-		"com.google.android.tts",
-		"com.breel.wallpapers20"
-       ));
+                "com.google.android.tts",
+                "com.breel.wallpapers20"
+    ));
 
     private static final ArrayList<String> extraPackagesToChange = 
         new ArrayList<String> (
@@ -134,7 +134,7 @@ public class PixelPropsUtils {
     private static final ArrayList<String> packagesToKeep = 
         new ArrayList<String> (
             Arrays.asList(
-               "com.google.android.as",
+            "com.google.android.as",
                 "com.google.android.apps.motionsense.bridge",
                 "com.google.android.euicc",
                 "com.google.ar.core",
@@ -149,11 +149,11 @@ public class PixelPropsUtils {
                 "com.google.oslo",
                 "it.ingdirect.app",
                 "com.google.android.apps.nexuslauncher",
-		"com.google.intelligence.sense",
-		"com.google.android.apps.tips",
-		"com.google.android.apps.dreamliner",
-		"com.google.android.apps.dreamlinerupdater",
-		"com.google.android.gms.update"
+                "com.google.intelligence.sense",
+                "com.google.android.apps.tips",
+                "com.google.android.apps.dreamliner",
+                "com.google.android.apps.dreamlinerupdater",
+                "com.google.android.gms.update"
         ));
 
     private static final ComponentName GMS_ADD_ACCOUNT_ACTIVITY = ComponentName.unflattenFromString(
@@ -203,7 +203,7 @@ public class PixelPropsUtils {
 
         final String processName = Application.getProcessName();
         if (!processName.toLowerCase().contains("unstable")
-		&& !processName.toLowerCase().contains("chimera")
+                && !processName.toLowerCase().contains("chimera")
                 && !processName.toLowerCase().contains("pixelmigrate")
                 && !processName.toLowerCase().contains("instrumentation")) {
             return false;
@@ -245,17 +245,17 @@ public class PixelPropsUtils {
 
     private static void spoofBuildGms() { 
             String[] sCertifiedProps = { 
-	    SystemProperties.get("persist.sys.pihooks.product_name", ""), 
-	    SystemProperties.get("persist.sys.pihooks.product_device", ""), 
+            SystemProperties.get("persist.sys.pihooks.product_name", ""), 
+            SystemProperties.get("persist.sys.pihooks.product_device", ""), 
             SystemProperties.get("persist.sys.pihooks.manufacturer", ""), 
-	    SystemProperties.get("persist.sys.pihooks.brand", ""), 
-     	    SystemProperties.get("persist.sys.pihooks.product_model", ""), 
+            SystemProperties.get("persist.sys.pihooks.brand", ""), 
+            SystemProperties.get("persist.sys.pihooks.product_model", ""), 
             SystemProperties.get("persist.sys.pihooks.build_fingerprint", ""), 
             SystemProperties.get("persist.sys.pihooks.security_patch", ""), 
             SystemProperties.get("persist.sys.pihooks.first_api_level", ""), 
             SystemProperties.get("persist.sys.pihooks.build_id", ""), 
-	    SystemProperties.get("persist.sys.pihooks.build_type", ""), 
-	    SystemProperties.get("persist.sys.pihooks.build_tags", "")
+            SystemProperties.get("persist.sys.pihooks.build_type", ""), 
+            SystemProperties.get("persist.sys.pihooks.build_tags", "")
         };
 
         if (sCertifiedProps == null || sCertifiedProps.length == 0) return;
@@ -366,6 +366,11 @@ public class PixelPropsUtils {
             setPropValue("FINGERPRINT", Build.VERSION.INCREMENTAL);
             return;
         }
+
+        // Check if pihooks is enabled and change device info if true
+        if (isPiHooksEnabled()) {
+            spoofBuildGms();
+        }
     }
 
     private static void setPropValue(String key, Object value) {
@@ -435,7 +440,7 @@ public class PixelPropsUtils {
 
     public static void onEngineGetCertificateChain() {
         // Check stack for SafetyNet or Play Integrity
-	if ((isCallerSafetyNet() || sIsFinsky) && !sIsSetupWizard && shouldTryToCertifyDevice()) {
+        if ((isCallerSafetyNet() || sIsFinsky) && !sIsSetupWizard && shouldTryToCertifyDevice()) {
             dlog("Blocked key attestation sIsGms=" + sIsGms + " sIsFinsky=" + sIsFinsky);
             throw new UnsupportedOperationException();
         }
@@ -444,4 +449,10 @@ public class PixelPropsUtils {
     public static void dlog(String msg) {
         if (DEBUG) Log.d(TAG, msg);
     }
+
+    private static boolean isPiHooksEnabled() {
+        return SystemProperties.getBoolean("persist.sys.pihooks.enable", false);
+    }
 }
+
+
