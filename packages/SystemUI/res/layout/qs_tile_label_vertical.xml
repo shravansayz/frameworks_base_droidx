@@ -21,6 +21,7 @@
     android:clipChildren="false"
     android:clipToPadding="false"
     android:orientation="vertical"
+    android:layout_margin="0dp"
     android:focusable="false"
     android:importantForAccessibility="no"
     android:layout_gravity="center_horizontal">
@@ -29,7 +30,7 @@
         android:id="@+id/tile_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
+        android:paddingTop="1dp"
         android:gravity="center_horizontal"
         android:textDirection="locale"
         android:ellipsize="marquee"
@@ -43,16 +44,15 @@
         android:id="@+id/app_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
         android:gravity="center_horizontal"
         android:textDirection="locale"
         android:ellipsize="marquee"
         android:marqueeRepeatLimit="1"
         android:singleLine="true"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:focusable="false"
         android:importantForAccessibility="no"
         android:textAppearance="@style/TextAppearance.QS.TileLabel.Secondary"
-        android:textColor="?android:attr/textColorSecondary"/>
+        android:textColor="?attr/onShadeInactive"/>
 
 </com.android.systemui.qs.tileimpl.IgnorableChildLinearLayout>

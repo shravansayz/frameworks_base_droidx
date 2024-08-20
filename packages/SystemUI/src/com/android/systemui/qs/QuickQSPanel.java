@@ -16,11 +16,8 @@
 
 package com.android.systemui.qs;
 
-import static com.android.systemui.util.qs.QSStyleUtils.isRoundQS;
-
 import android.content.Context;
 import android.content.res.Configuration;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -30,6 +27,9 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.res.R;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.qs.TileUtils;
+import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.tuner.TunerService;
 
 /**
  * Version of QSPanel that only shows N Quick Tiles in the QS Header.
@@ -40,42 +40,25 @@ public class QuickQSPanel extends QSPanel {
     // A fallback value for max tiles number when setting via Tuner (parseNumTiles)
     public static final int TUNER_MAX_TILES_FALLBACK = 6;
 
-    // Tile Columns on normal conditions
-    public int mMaxColumnsPortrait = 5;
-    public int mMaxColumnsLandscape = 6;
-    // Tile Columns when media player is visible
-    public int mMaxColumnsMediaPlayer = 4;
-
     private boolean mDisabledByPolicy;
     private int mMaxTiles;
+    private int mColumns;
 
     public QuickQSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
         mMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_tiles);
-        mMaxColumnsPortrait = getResources().getInteger(R.integer.quick_qs_panel_num_columns);
-        mMaxColumnsLandscape = getResources().getInteger(R.integer.quick_qs_panel_num_columns_landscape);
-        mMaxColumnsMediaPlayer = getResources().getInteger(R.integer.quick_qs_panel_num_columns_media);
-        if (isRoundQS()) {
-            mMaxColumnsPortrait = Settings.Secure.getInt(context.getContentResolver(),
-                    Settings.Secure.QQS_NUM_COLUMNS, mMaxColumnsPortrait);
-            mMaxColumnsLandscape = Settings.Secure.getInt(context.getContentResolver(),
-                    Settings.Secure.QQS_NUM_COLUMNS_LANDSCAPE, mMaxColumnsLandscape);
-
-            mMaxTiles = Math.max(mMaxColumnsPortrait, mMaxColumnsLandscape);
-            mMaxTiles = Math.max(mMaxColumnsMediaPlayer, mMaxTiles);
-        }
+        setMaxTiles(mMaxTiles);
     }
 
     @Override
     protected void setHorizontalContentContainerClipping() {
         mHorizontalContentContainer.setClipToPadding(false);
         mHorizontalContentContainer.setClipChildren(false);
-        updateColumns();
     }
 
     @Override
     public TileLayout getOrCreateTileLayout() {
-        QQSSideLabelTileLayout layout = new QQSSideLabelTileLayout(mContext);
+        QQSSideLabelTileLayout layout = new QQSSideLabelTileLayout(mContext, this);
         layout.setId(R.id.qqs_tile_layout);
         return layout;
     }
@@ -111,19 +94,22 @@ public class QuickQSPanel extends QSPanel {
         return !mExpanded;
     }
 
-    public void updateColumns() {
-        boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-
-        int mColumnsMediaPlayer = mUsingHorizontalLayout ?
-            mMaxColumnsMediaPlayer :
-            mMaxColumnsLandscape;
-
-        mTileLayout.setMaxColumns(isLandscape ?
-            mColumnsMediaPlayer :
-            mMaxColumnsPortrait);
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mColumns = TileUtils.getQSColumnsCount(mContext);
+        setMaxTiles(mColumns);
+        requestLayout();
     }
 
-    public void setMaxTiles(int maxTiles) {
+    public void setMaxTiles(int tiles) {
+        int maxTiles = tiles * TileUtils.getQSRowsCount(mContext);
+        mColumns = TileUtils.getQSColumnsCount(mContext);
+        if (maxTiles > mColumns && (maxTiles % mColumns != 0)) {
+            maxTiles--;
+            setMaxTiles(maxTiles);
+            return;
+        }
         mMaxTiles = maxTiles;
     }
 
@@ -133,9 +119,22 @@ public class QuickQSPanel extends QSPanel {
             // No Brightness or Tooltip for you!
             super.onTuningChanged(key, "0");
         }
+        switch (key) {
+            case QS_LAYOUT_COLUMNS:
+            case QS_LAYOUT_COLUMNS_LANDSCAPE:
+            case QQS_LAYOUT_ROWS:
+            case QQS_LAYOUT_ROWS_LANDSCAPE:
+                mColumns = TileUtils.getQSColumnsCount(mContext);
+                setMaxTiles(mColumns);
+                super.onTuningChanged(key, newValue);
+                break;
+            default:
+                super.onTuningChanged(key, newValue);
+         }
     }
 
     public int getNumQuickTiles() {
+        setMaxTiles(mColumns);
         return mMaxTiles;
     }
 
@@ -205,22 +204,24 @@ public class QuickQSPanel extends QSPanel {
     static class QQSSideLabelTileLayout extends SideLabelTileLayout {
 
         private boolean mLastSelected;
+        private QuickQSPanel mQSPanel;
 
-        QQSSideLabelTileLayout(Context context) {
+        QQSSideLabelTileLayout(Context context, QuickQSPanel qsPanel) {
             super(context, null);
+            mQSPanel = qsPanel;
             setClipChildren(false);
             setClipToPadding(false);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                     LayoutParams.WRAP_CONTENT);
             setLayoutParams(lp);
-            setMaxColumns(6);
         }
 
         @Override
         public boolean updateResources() {
             mResourceCellHeightResId = R.dimen.qs_quick_tile_size;
             boolean b = super.updateResources();
-            mMaxAllowedRows = getResources().getInteger(R.integer.quick_qs_panel_max_rows);
+            mMaxAllowedRows = Math.max(TileUtils.getQSRowsCount(mContext),
+                    getResources().getInteger(R.integer.quick_qs_panel_max_rows));
             return b;
         }
 
@@ -237,7 +238,8 @@ public class QuickQSPanel extends QSPanel {
         @Override
         protected void onConfigurationChanged(Configuration newConfig) {
             super.onConfigurationChanged(newConfig);
-            updateResources();
+            updateSettings();
+            requestLayout();
         }
 
         @Override
@@ -284,6 +286,19 @@ public class QuickQSPanel extends QSPanel {
             }
             setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
             mLastSelected = selected;
+        }
+
+        @Override
+        public int getResourceColumns() {
+            return TileUtils.getQSColumnsCount(mContext);
+        }
+
+        @Override
+        public void updateSettings() {
+            updateResources();
+            mQSPanel.setMaxTiles(getResourceColumns());
+            updateMaxRows(10000, mRecords.size());
+            super.updateSettings();
         }
     }
 }

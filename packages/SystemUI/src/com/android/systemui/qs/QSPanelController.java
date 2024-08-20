@@ -92,7 +92,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             SplitShadeStateController splitShadeStateController,
             SceneContainerFlags sceneContainerFlags) {
         super(view, qsHost, qsCustomizerController, usingMediaPlayer, mediaHost,
-                metricsLogger, uiEventLogger, qsLogger, dumpManager, splitShadeStateController);
+                metricsLogger, uiEventLogger, qsLogger, dumpManager, splitShadeStateController, tunerService);
         mTunerService = tunerService;
         mQsCustomizerController = qsCustomizerController;
         mQsTileRevealControllerFactory = qsTileRevealControllerFactory;
@@ -126,6 +126,11 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
         updateMediaDisappearParameters();
         mTunerService.addTunable(mView, QSPanel.QS_SHOW_AUTO_BRIGHTNESS);
+        
+        mTunerService.addTunable(mView, QSPanel.QS_LAYOUT_COLUMNS);
+        mTunerService.addTunable(mView, QSPanel.QS_LAYOUT_COLUMNS_LANDSCAPE);
+        mTunerService.addTunable(mView, QSPanel.QQS_LAYOUT_ROWS);
+        mTunerService.addTunable(mView, QSPanel.QQS_LAYOUT_ROWS_LANDSCAPE);
 
         mTunerService.addTunable(mView, QS_SHOW_BRIGHTNESS);
         mView.updateResources();
@@ -134,7 +139,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             refreshAllTiles();
         }
         switchTileLayout(true);
-        mView.updateColumns();
         mBrightnessMirrorHandler.onQsPanelAttached();
         PagedTileLayout pagedTileLayout= ((PagedTileLayout) mView.getOrCreateTileLayout());
         pagedTileLayout.setOnTouchListener(mTileLayoutTouchListener);
@@ -156,7 +160,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     @Override
     protected void onConfigurationChanged() {
         mView.updateResources();
-        mView.updateColumns();
         int newDensity = mView.getResources().getConfiguration().densityDpi;
         if (newDensity != mLastDensity) {
             mLastDensity = newDensity;

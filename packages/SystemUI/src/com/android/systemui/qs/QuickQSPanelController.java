@@ -28,12 +28,14 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
 import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.qs.TileUtils;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.leak.RotationUtils;
+import com.android.systemui.tuner.TunerService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,9 +46,11 @@ import javax.inject.Provider;
 
 /** Controller for {@link QuickQSPanel}. */
 @QSScope
-public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> {
+public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel>
+        implements TunerService.Tunable {
 
     private final Provider<Boolean> mUsingCollapsedLandscapeMediaProvider;
+    private final TunerService mTunerService;
 
     @Inject
     QuickQSPanelController(QuickQSPanel view, QSHost qsHost,
@@ -56,16 +60,18 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
             @Named(QS_USING_COLLAPSED_LANDSCAPE_MEDIA)
                     Provider<Boolean> usingCollapsedLandscapeMediaProvider,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
-            DumpManager dumpManager, SplitShadeStateController splitShadeStateController
+            DumpManager dumpManager, SplitShadeStateController splitShadeStateController, TunerService tunerService
     ) {
         super(view, qsHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
-                uiEventLogger, qsLogger, dumpManager, splitShadeStateController);
+                uiEventLogger, qsLogger, dumpManager, splitShadeStateController, tunerService);
         mUsingCollapsedLandscapeMediaProvider = usingCollapsedLandscapeMediaProvider;
+        mTunerService = tunerService;
     }
 
     @Override
     protected void onInit() {
         super.onInit();
+        updateConfig();
         updateMediaExpansion();
         mMediaHost.setShowsOnlyActiveMedia(true);
         mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
@@ -91,7 +97,12 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
     @Override
     protected void onViewAttached() {
         super.onViewAttached();
-        mView.updateColumns();
+        
+        mTunerService.addTunable(mView, QSPanel.QS_LAYOUT_COLUMNS);
+        mTunerService.addTunable(mView, QSPanel.QS_LAYOUT_COLUMNS_LANDSCAPE);
+        mTunerService.addTunable(mView, QSPanel.QQS_LAYOUT_ROWS);
+        mTunerService.addTunable(mView, QSPanel.QQS_LAYOUT_ROWS_LANDSCAPE);
+
     }
 
     @Override
@@ -99,20 +110,10 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         super.onViewDetached();
     }
 
-    private void setMaxTiles(int parseNumTiles) {
-        mView.setMaxTiles(parseNumTiles);
-        mView.updateColumns();
-        setTiles();
-    }
-
     @Override
     protected void onConfigurationChanged() {
-        int newMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_tiles);
-        if (newMaxTiles != mView.getNumQuickTiles()) {
-            setMaxTiles(newMaxTiles);
-        }
+        updateConfig();
         updateMediaExpansion();
-        mView.updateColumns();
     }
 
     @Override
@@ -125,6 +126,11 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
             }
         }
         super.setTiles(tiles, /* collapsedView */ true);
+    }
+
+    private void updateConfig() {
+        mView.setMaxTiles(TileUtils.getQSColumnsCount(getContext()));
+        setTiles();
     }
 
     public void setContentMargins(int marginStart, int marginEnd) {

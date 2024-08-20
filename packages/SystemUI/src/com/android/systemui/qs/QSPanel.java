@@ -17,7 +17,6 @@
 package com.android.systemui.qs;
 
 import static com.android.systemui.util.Utils.useQsMediaPlayer;
-import static com.android.systemui.util.qs.QSStyleUtils.isRoundQS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -26,6 +25,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -35,7 +35,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
-import android.provider.Settings;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -59,6 +58,20 @@ public class QSPanel extends LinearLayout implements Tunable {
     
     public static final String QS_SHOW_AUTO_BRIGHTNESS =
             Settings.Secure.QS_SHOW_AUTO_BRIGHTNESS;
+    public static final String QS_TILE_VERTICAL_LAYOUT =
+            "system:" + Settings.System.QS_TILE_VERTICAL_LAYOUT;
+    public static final String QS_TILE_LABEL_HIDE =
+            "system:" + Settings.System.QS_TILE_LABEL_HIDE;
+    public static final String QS_TILE_LABEL_SIZE =
+            "system:" + Settings.System.QS_TILE_LABEL_SIZE;
+    public static final String QS_LAYOUT_COLUMNS =
+            "system:" + Settings.System.QS_LAYOUT_COLUMNS;
+    public static final String QS_LAYOUT_COLUMNS_LANDSCAPE =
+            "system:" + Settings.System.QS_LAYOUT_COLUMNS_LANDSCAPE;
+    public static final String QQS_LAYOUT_ROWS =
+            "system:" + Settings.System.QQS_LAYOUT_ROWS;
+    public static final String QQS_LAYOUT_ROWS_LANDSCAPE =
+            "system:" + Settings.System.QQS_LAYOUT_ROWS_LANDSCAPE;
 
     private static final String TAG = "QSPanel";
 
@@ -97,10 +110,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     private PageIndicator mFooterPageIndicator;
     private int mContentMarginStart;
     private int mContentMarginEnd;
-    private int mMaxColumnsPortrait;
-    private int mMaxColumnsLandscape;
-    private int mMaxColumnsMediaPlayer;
-    protected boolean mUsingHorizontalLayout;
+    private boolean mUsingHorizontalLayout;
 
     @Nullable
     private LinearLayout mHorizontalLinearLayout;
@@ -130,16 +140,6 @@ public class QSPanel extends LinearLayout implements Tunable {
                 R.dimen.quick_settings_bottom_margin_media);
         mMediaTopMargin = getResources().getDimensionPixelSize(
                 R.dimen.qs_tile_margin_vertical);
-        mMaxColumnsPortrait = getResources().getInteger(R.integer.qs_panel_num_columns);
-        mMaxColumnsLandscape = getResources().getInteger(R.integer.qs_panel_num_columns_landscape);
-        mMaxColumnsMediaPlayer = getResources().getInteger(R.integer.qs_panel_num_columns_media);
-        if (isRoundQS()) {
-            mMaxColumnsPortrait = Settings.Secure.getInt(context.getContentResolver(),
-                    Settings.Secure.QS_NUM_COLUMNS, mMaxColumnsPortrait);
-            mMaxColumnsLandscape = Settings.Secure.getInt(context.getContentResolver(),
-                    Settings.Secure.QS_NUM_COLUMNS_LANDSCAPE, mMaxColumnsLandscape);
-        }
-
         mContext = context;
 
         setOrientation(VERTICAL);
@@ -203,7 +203,6 @@ public class QSPanel extends LinearLayout implements Tunable {
         mClippingRect.left = 0;
         mClippingRect.top = -1000;
         mHorizontalContentContainer.setClipBounds(mClippingRect);
-        updateColumns();
     }
 
     /**
@@ -366,6 +365,11 @@ public class QSPanel extends LinearLayout implements Tunable {
                     mAutoBrightnessView.setVisibility(mIsAutomaticBrightnessAvailable &&
                             TunerService.parseIntegerSwitch(newValue, true) ? View.VISIBLE : View.GONE);
                 }
+            case QS_LAYOUT_COLUMNS:
+            case QS_LAYOUT_COLUMNS_LANDSCAPE:
+            case QQS_LAYOUT_ROWS:
+            case QQS_LAYOUT_ROWS_LANDSCAPE:
+                needsDynamicRowsAndColumns();
                 break;
             default:
                 break;
@@ -439,6 +443,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         super.onConfigurationChanged(newConfig);
         mOnConfigurationChangedListeners.forEach(
                 listener -> listener.onConfigurationChange(newConfig));
+        needsDynamicRowsAndColumns();
     }
 
     @Override
@@ -472,8 +477,11 @@ public class QSPanel extends LinearLayout implements Tunable {
         return false;
     }
 
-    private boolean needsDynamicRowsAndColumns() {
-        return true;
+    public void needsDynamicRowsAndColumns() {
+        if (mTileLayout != null) {
+            mTileLayout.setMinRows(mTileLayout.getResourceRows());
+            mTileLayout.setMaxColumns(mTileLayout.getResourceColumns());
+        }
     }
 
     private void switchAllContentToParent(ViewGroup parent, QSTileLayout newLayout) {
@@ -648,18 +656,6 @@ public class QSPanel extends LinearLayout implements Tunable {
         }
     }
 
-    public void updateColumns() {
-        boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-
-        int mColumnsMediaPlayer = mUsingHorizontalLayout ?
-            mMaxColumnsMediaPlayer :
-            mMaxColumnsLandscape;
-
-        mTileLayout.setMaxColumns(isLandscape ?
-            mColumnsMediaPlayer :
-            mMaxColumnsPortrait);
-    }
-
     void setUsingHorizontalLayout(boolean horizontal, ViewGroup mediaHostView, boolean force) {
         if (horizontal != mUsingHorizontalLayout || force) {
             Log.d(getDumpableTag(), "setUsingHorizontalLayout: " + horizontal + ", " + force);
@@ -667,9 +663,7 @@ public class QSPanel extends LinearLayout implements Tunable {
             ViewGroup newParent = horizontal ? mHorizontalContentContainer : this;
             switchAllContentToParent(newParent, mTileLayout);
             reAttachMediaHost(mediaHostView, horizontal);
-            if (needsDynamicRowsAndColumns()) {
-                updateColumns();
-            }
+            needsDynamicRowsAndColumns();
             updateMargins(mediaHostView);
             mHorizontalLinearLayout.setVisibility(horizontal ? View.VISIBLE : View.GONE);
         }
@@ -778,12 +772,6 @@ public class QSPanel extends LinearLayout implements Tunable {
             return false;
         }
 
-        /** Gets the max number of columns to show
-         *
-         * @return The maximum number of visible columns.
-         */
-        int getMaxColumns();
-
         /**
          * Sets the expansion value and proposedTranslation to panel.
          */
@@ -792,6 +780,12 @@ public class QSPanel extends LinearLayout implements Tunable {
         int getNumVisibleTiles();
 
         default void setLogger(QSLogger qsLogger) { }
+
+        int getResourceColumns();
+
+        int getResourceRows();
+
+        void updateSettings();
     }
 
     interface OnConfigurationChangedListener {

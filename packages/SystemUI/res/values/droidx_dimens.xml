@@ -57,21 +57,6 @@
      <dimen name="status_bar_battery_icon_width_landscape_m">28.0dip</dimen>
      <dimen name="status_bar_battery_icon_width_landscape_n">25.0dip</dimen>
      <dimen name="status_bar_battery_icon_width_landscape_o">22.0dip</dimen>
-     
-     <!-- QQS Brightness slider -->
-    <dimen name="qqs_top_brightness_margin_top">4dp</dimen>
-    <dimen name="qqs_top_brightness_margin_bottom">12dp</dimen>
-    <dimen name="qqs_bottom_brightness_margin_top">12dp</dimen>
-
-    <!-- QS Brightness slider -->
-    <dimen name="qs_top_brightness_margin_top">8dp</dimen>
-    <dimen name="qs_top_brightness_margin_bottom">10dp</dimen>
-    <dimen name="qs_bottom_brightness_margin_top">10dp</dimen>
-
-    <!-- QS Paddings -->
-    <dimen name="custom_qs_panel_padding_top">0dp</dimen>
-    <dimen name="custom_notification_row_padding">16dp</dimen>
-    <dimen name="custom_qs_tile_label_line_height">20sp</dimen>
 
      <!-- Udfps fingerprint animation -->
      <dimen name="udfps_animation_size">280dp</dimen>
@@ -85,5 +70,8 @@
 
      <!-- Maximum vertical offset of navigation bar for burn-in protection -->
      <dimen name="navigation_bar_burn_in_offset_max_y">8dp</dimen>
+     
+     <!-- QS A11 Style -->
+     <dimen name="custom_qs_panel_padding_top">0dp</dimen>
 
 </resources>
