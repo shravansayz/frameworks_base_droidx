@@ -540,7 +540,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     override fun getAnimatedView(): LaunchableView {
-        return if (isRoundQS()) getIconWithBackground() as LaunchableView else this
+        return if (isA11Style) getIconWithBackground() as LaunchableView else this
     }
 
     override fun setVisibility(visibility: Int) {
